@@ -2,7 +2,6 @@ package items;
 
 import containers.LinkedList;
 
-
 /**
  * An Inventory is composed of n slots. Each slot may store only
  * one type of item--specified by *slots*.
@@ -11,8 +10,7 @@ import containers.LinkedList;
  * stored. Individual slots may contain any number of the same
  * Item--if the Item is stackable.
  */
-public class Inventory
-{
+public class Inventory {
     /**
      * This is the Default Inventory size.
      */
@@ -25,11 +23,8 @@ public class Inventory
      * @param lhs stack whose size will be increased
      * @param rhs stack whose size we need to examine
      */
-    public static void mergeStacks(ItemStack lhs, ItemStack rhs)
-    {
-        // lhs needs to have items added to it.
-        // rhs's size is needed
-        // lhs.????(rhs.????)
+    public static void mergeStacks(ItemStack lhs, ItemStack rhs) {
+        lhs.addItems(rhs.size());
     }
 
     /**
@@ -45,8 +40,7 @@ public class Inventory
     /**
      * Default to an inventory with 10 slots.
      */
-    public Inventory()
-    {
+    public Inventory() {
         this(DEFAULT_SIZE);
     }
 
@@ -55,25 +49,22 @@ public class Inventory
      *
      * @param desiredCapacity size of the new Inventory
      */
-    public Inventory(int desiredCapacity)
-    {
-        this.slots    = new LinkedList<ItemStack>();
+    public Inventory(int desiredCapacity) {
+        this.slots = new LinkedList<ItemStack>();
         this.capacity = desiredCapacity;
     }
 
     /**
      * Determine the number of slots currently in use.
      */
-    public int utilizedSlots()
-    {
+    public int utilizedSlots() {
         return this.slots.currentSize;
     }
 
     /**
      * Determine the number of empty (unused) slots.
      */
-    public int emptySlots()
-    {
+    public int emptySlots() {
         return this.totalSlots() - this.utilizedSlots();
     }
 
@@ -81,8 +72,7 @@ public class Inventory
      * Retrieve the capacity (number of distinct types of items) that this
      * inventory can store.
      */
-    public int totalSlots()
-    {
+    public int totalSlots() {
         return this.capacity;
     }
 
@@ -91,10 +81,8 @@ public class Inventory
      *
      * @return true if the current size is equal to capacity
      */
-    public boolean isFull()
-    {
-        // Replace the next line
-        return false;
+    public boolean isFull() {
+        return this.slots.currentSize == this.capacity;
     }
 
     /**
@@ -102,8 +90,7 @@ public class Inventory
      *
      * @return true if current size is zero
      */
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return this.slots.currentSize == 0;
     }
 
@@ -115,10 +102,20 @@ public class Inventory
      *
      * @return matching stack if one was found and `null` otherwise
      */
-    public ItemStack findMatchingItemStack(ItemStack key)
-    {
-        // Add the necessary sequential search loop
+    public ItemStack findMatchingItemStack(ItemStack key) {
+        // Begin iterating at the head of the list
+        LinkedList.Node<ItemStack> it = this.slots.head;
 
+        // Traverse the list until we reach the end
+        while (it != null) {
+            // Check if the current stack matches the key
+            if (it.data.equals(key)) {
+                return it.data; // Return matching ItemStack
+            }
+            it = it.next; // Move to the next Node
+        }
+
+        // No matching stack was found
         return null;
     }
 
@@ -127,12 +124,24 @@ public class Inventory
      *
      * @param toAdd data that we want to store in a Node and add to the list
      */
-    public void addItemStackNoCheck(ItemStack toAdd)
-    {
+    public void addItemStackNoCheck(ItemStack toAdd) {
         LinkedList.Node<ItemStack> newNode = new LinkedList.Node<>(toAdd);
 
-        // Use the appendNode/add logic from Review 1 as your starting point
-        // Once we reach this function... we know that `toAdd` must be stored
+        // If the list is empty, set the new Node as the head
+        if (this.slots.head == null) {
+            this.slots.head = newNode;
+        } else {
+            // Traverse the list until we reach the end
+            LinkedList.Node<ItemStack> current = this.slots.head;
+            while (current.next != null) {
+                current = current.next;
+            }
+            // Append the new Node to the end of the list
+            current.next = newNode;
+        }
+
+        // Increase the size of the list
+        this.slots.currentSize++;
     }
 
     /**
@@ -142,11 +151,10 @@ public class Inventory
      *
      * @return true if *stack* was added and false otherwise
      */
-    public boolean addItems(ItemStack stack)
-    {
+    public boolean addItems(ItemStack stack) {
         ItemStack match = this.findMatchingItemStack(stack);
 
-        // if a match was found
+        // If a match was found
         if (match != null) {
             // If the Item is stackable, add it to the ItemStack
             if (match.permitsStacking()) {
@@ -168,11 +176,9 @@ public class Inventory
      * *Print* a Summary of the Inventory and all Items contained within.
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         String summaryLine = String.format(
-            " -Used %d of %d slots%n", this.slots.currentSize, this.capacity
-        );
+                " -Used %d of %d slots%n", this.slots.currentSize, this.capacity);
 
         StringBuilder strBld = new StringBuilder();
         strBld.append(summaryLine);
